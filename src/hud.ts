@@ -98,9 +98,9 @@ export class HUD {
     this.timerText.position.set(GAME_WIDTH / 2, 38);
     this.container.addChild(this.timerText);
 
-    // --- Boost gauge (bottom-left) ---
+    // --- Boost gauge (above D-Pad area, left) ---
     const bgX = 20;
-    const bgY = GAME_HEIGHT - 50;
+    const bgY = GAME_HEIGHT - 195;
     this.boostBg = new Graphics();
     // shadow
     this.boostBg.roundRect(bgX + 1, bgY + 1, 100, 22, 11).fill({ color: 0x000000, alpha: 0.3 });
@@ -155,7 +155,7 @@ export class HUD {
 
     // boost gauge
     const bgX = 20;
-    const bgY = GAME_HEIGHT - 50;
+    const bgY = GAME_HEIGHT - 195;
     this.boostFill.clear();
     if (boosting) {
       this.boostFill.roundRect(bgX, bgY, 100, 22, 11).fill({ color: 0xff9800, alpha: 0.85 });

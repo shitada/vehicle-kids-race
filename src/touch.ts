@@ -115,8 +115,8 @@ export class TouchControls {
   }
 
   private createActionButtons() {
-    const bx = GAME_WIDTH - 90;
-    const by = GAME_HEIGHT - 120;
+    const bx = GAME_WIDTH - 50;
+    const by = GAME_HEIGHT - 240;
 
     // Boost button (large)
     this.makeActionBtn(bx, by, 36, '🔥', 0xff9800, () => {
