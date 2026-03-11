@@ -27,7 +27,7 @@ export class TouchControls {
 
   private createDPad() {
     const cx = 90;
-    const cy = GAME_HEIGHT - 100;
+    const cy = GAME_HEIGHT - 90;
     const size = 40;
     const gap = 4;
 
@@ -115,16 +115,16 @@ export class TouchControls {
   }
 
   private createActionButtons() {
-    const bx = GAME_WIDTH - 50;
-    const by = GAME_HEIGHT - 240;
+    const bx = GAME_WIDTH - 60;
+    const by = GAME_HEIGHT - 180;
 
     // Boost button (large)
-    this.makeActionBtn(bx, by, 36, '🔥', 0xff9800, () => {
+    this.makeActionBtn(bx, by, 34, '🔥', 0xff9800, () => {
       this.input.touchBoost = true;
     });
 
     // Barrel Roll button (small, below boost)
-    this.makeActionBtn(bx, by + 80, 24, '🌀', 0x7c4dff, () => {
+    this.makeActionBtn(bx, by + 90, 28, '🌀', 0x7c4dff, () => {
       this.input.touchBarrel = true;
     });
   }

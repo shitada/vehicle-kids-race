@@ -23,33 +23,33 @@ export class HUD {
   private boostIcon: Text;
 
   constructor() {
-    // --- Speedometer (bottom-right) ---
-    const meterX = GAME_WIDTH - 80;
-    const meterY = GAME_HEIGHT - 70;
+    // --- Speedometer (top-right, compact) ---
+    const meterX = GAME_WIDTH - 60;
+    const meterY = 65;
     this.meterCenter = { x: meterX, y: meterY };
 
     this.meterBg = new Graphics();
     // outer ring shadow
-    this.meterBg.circle(meterX + 2, meterY + 2, 52).fill({ color: 0x000000, alpha: 0.3 });
+    this.meterBg.circle(meterX + 2, meterY + 2, 40).fill({ color: 0x000000, alpha: 0.3 });
     // dark bg
-    this.meterBg.circle(meterX, meterY, 52).fill({ color: 0x1a1a2e, alpha: 0.85 });
+    this.meterBg.circle(meterX, meterY, 40).fill({ color: 0x1a1a2e, alpha: 0.85 });
     // inner ring
-    this.meterBg.circle(meterX, meterY, 48).stroke({ color: 0x444466, width: 2, alpha: 0.6 });
+    this.meterBg.circle(meterX, meterY, 37).stroke({ color: 0x444466, width: 2, alpha: 0.6 });
     // arc scale (moveTo first to avoid stray connecting line)
-    const arcStartX = meterX + Math.cos(Math.PI * 0.8) * 42;
-    const arcStartY = meterY + Math.sin(Math.PI * 0.8) * 42;
-    this.meterBg.moveTo(arcStartX, arcStartY).arc(meterX, meterY, 42, Math.PI * 0.8, Math.PI * 2.2).stroke({ color: 0xffffff, width: 3, alpha: 0.7 });
+    const arcStartX = meterX + Math.cos(Math.PI * 0.8) * 32;
+    const arcStartY = meterY + Math.sin(Math.PI * 0.8) * 32;
+    this.meterBg.moveTo(arcStartX, arcStartY).arc(meterX, meterY, 32, Math.PI * 0.8, Math.PI * 2.2).stroke({ color: 0xffffff, width: 2, alpha: 0.7 });
     // tick marks
     for (let i = 0; i <= 10; i++) {
       const a = Math.PI * 0.8 + (i / 10) * Math.PI * 1.4;
-      const inner = 36;
-      const outer = 42;
+      const inner = 28;
+      const outer = 32;
       this.meterBg.moveTo(meterX + Math.cos(a) * inner, meterY + Math.sin(a) * inner)
         .lineTo(meterX + Math.cos(a) * outer, meterY + Math.sin(a) * outer)
         .stroke({ color: 0xffffff, width: i % 5 === 0 ? 2 : 1, alpha: 0.5 });
     }
     // center dot
-    this.meterBg.circle(meterX, meterY, 4).fill(0xffd700);
+    this.meterBg.circle(meterX, meterY, 3).fill(0xffd700);
     this.container.addChild(this.meterBg);
 
     const meterLabel = new Text({ text: 'スピード', style: STYLE_SMALL });
@@ -126,15 +126,15 @@ export class HUD {
     this.meterNeedle.clear();
     // needle shadow
     this.meterNeedle.moveTo(cx + 1, cy + 1)
-      .lineTo(cx + 1 + Math.cos(angle) * 36, cy + 1 + Math.sin(angle) * 36)
-      .stroke({ color: 0x000000, width: 4, alpha: 0.3 });
+      .lineTo(cx + 1 + Math.cos(angle) * 28, cy + 1 + Math.sin(angle) * 28)
+      .stroke({ color: 0x000000, width: 3, alpha: 0.3 });
     // needle
     const needleColor = boosting ? 0xff1744 : 0xffd700;
     this.meterNeedle.moveTo(cx, cy)
-      .lineTo(cx + Math.cos(angle) * 36, cy + Math.sin(angle) * 36)
-      .stroke({ color: needleColor, width: 3 });
+      .lineTo(cx + Math.cos(angle) * 28, cy + Math.sin(angle) * 28)
+      .stroke({ color: needleColor, width: 2 });
     // glow tip
-    this.meterNeedle.circle(cx + Math.cos(angle) * 36, cy + Math.sin(angle) * 36, 3)
+    this.meterNeedle.circle(cx + Math.cos(angle) * 28, cy + Math.sin(angle) * 28, 2)
       .fill({ color: needleColor, alpha: 0.8 });
 
     // progress bar
