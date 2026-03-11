@@ -35,8 +35,10 @@ export class HUD {
     this.meterBg.circle(meterX, meterY, 52).fill({ color: 0x1a1a2e, alpha: 0.85 });
     // inner ring
     this.meterBg.circle(meterX, meterY, 48).stroke({ color: 0x444466, width: 2, alpha: 0.6 });
-    // arc scale
-    this.meterBg.arc(meterX, meterY, 42, Math.PI * 0.8, Math.PI * 2.2).stroke({ color: 0xffffff, width: 3, alpha: 0.7 });
+    // arc scale (moveTo first to avoid stray connecting line)
+    const arcStartX = meterX + Math.cos(Math.PI * 0.8) * 42;
+    const arcStartY = meterY + Math.sin(Math.PI * 0.8) * 42;
+    this.meterBg.moveTo(arcStartX, arcStartY).arc(meterX, meterY, 42, Math.PI * 0.8, Math.PI * 2.2).stroke({ color: 0xffffff, width: 3, alpha: 0.7 });
     // tick marks
     for (let i = 0; i <= 10; i++) {
       const a = Math.PI * 0.8 + (i / 10) * Math.PI * 1.4;
@@ -80,9 +82,9 @@ export class HUD {
     this.container.addChild(this.progressFill);
 
     this.progressPlane = new Graphics();
-    // bigger, cleaner plane icon
-    this.progressPlane.moveTo(0, -6).lineTo(12, 0).lineTo(0, 6).lineTo(2, 0).closePath().fill(0xffd700);
-    this.progressPlane.moveTo(0, -6).lineTo(12, 0).lineTo(0, 6).lineTo(2, 0).closePath().stroke({ color: 0xe65100, width: 1 });
+    // cleaner plane icon (proper kite shape, no self-intersection)
+    this.progressPlane.moveTo(12, 0).lineTo(0, -6).lineTo(-3, 0).lineTo(0, 6).closePath().fill(0xffd700);
+    this.progressPlane.moveTo(12, 0).lineTo(0, -6).lineTo(-3, 0).lineTo(0, 6).closePath().stroke({ color: 0xe65100, width: 1 });
     this.container.addChild(this.progressPlane);
 
     // --- Coin counter (top-left) ---

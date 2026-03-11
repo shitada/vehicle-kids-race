@@ -6,6 +6,7 @@ import {
   STYLE_RESULT_HEADING, STYLE_RESULT_BODY, STYLE_RESULT_ACCENT, STYLE_RESULT_TITLE,
   STYLE_STARS, STYLE_PHOTO_LABEL,
 } from './styles';
+import { sfxClick, sfxCountdown, resumeAudio } from './audio';
 
 /* ========= TITLE SCREEN ========= */
 export class TitleScreen {
@@ -73,6 +74,8 @@ export class TitleScreen {
     btn.eventMode = 'static';
     btn.cursor = 'pointer';
     btn.on('pointerdown', () => {
+      sfxClick();
+      resumeAudio();
       if (this.onStart) this.onStart();
     });
     this.container.addChild(btn);
@@ -130,6 +133,7 @@ export class CountdownOverlay {
     this.label.text = this.texts[0];
     this.label.scale.set(1.5);
     this.container.visible = true;
+    sfxCountdown(false);
   }
 
   update(dt: number) {
@@ -153,6 +157,7 @@ export class CountdownOverlay {
       this.label.alpha = 1;
       this.label.scale.set(1.5);
       this.timer = this.currentIdx === 3 ? 600 : 800;
+      sfxCountdown(this.currentIdx === 3);
     }
   }
 }
@@ -284,7 +289,7 @@ export class ResultScreen {
     btn.position.set(x, y);
     btn.eventMode = 'static';
     btn.cursor = 'pointer';
-    btn.on('pointerdown', onClick);
+    btn.on('pointerdown', () => { sfxClick(); onClick(); });
     return btn;
   }
 

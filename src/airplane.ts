@@ -24,7 +24,7 @@ export class Airplane {
 
   // barrel roll
   rolling = false;
-  private rollTimer = 0;
+  rollTimer = 0;
 
   // trail
   trail: { x: number; y: number; alpha: number }[] = [];
@@ -49,35 +49,100 @@ export class Airplane {
     g.clear();
 
     const colors = this.getLevelColors();
-    // fuselage
-    g.ellipse(0, 0, 32, 14).fill(colors.main);
-    // cockpit
-    g.ellipse(12, -4, 10, 8).fill(0xb3e5fc);
-    // wings
-    g.moveTo(-8, 0).lineTo(-20, -22).lineTo(8, -2).closePath().fill(colors.wing);
-    g.moveTo(-8, 0).lineTo(-20, 22).lineTo(8, 2).closePath().fill(colors.wing);
-    // tail
-    g.moveTo(-28, 0).lineTo(-38, -14).lineTo(-24, 0).closePath().fill(colors.tail);
 
-    // level decorations
+    // ----- fuselage (rounded, cute) -----
+    // body shadow
+    g.ellipse(1, 3, 30, 14).fill({ color: 0x000000, alpha: 0.12 });
+    // main body
+    g.ellipse(0, 0, 30, 13).fill(colors.main);
+    // body highlight (top)
+    g.ellipse(-2, -5, 22, 5).fill({ color: 0xffffff, alpha: 0.25 });
+
+    // ----- nose cone -----
+    g.ellipse(26, 0, 8, 8).fill(colors.main);
+    g.ellipse(26, -2, 6, 4).fill({ color: 0xffffff, alpha: 0.15 });
+
+    // ----- cockpit window -----
+    g.ellipse(14, -3, 8, 6).fill(0xb3e5fc);
+    g.ellipse(14, -3, 8, 6).stroke({ color: 0x90caf9, width: 1.5 });
+    // window shine
+    g.ellipse(12, -5, 3, 2.5).fill({ color: 0xffffff, alpha: 0.7 });
+
+    // ----- cute face -----
+    // eyes (inside cockpit)
+    g.circle(12, -2, 1.8).fill(0x333333);
+    g.circle(17, -2, 1.8).fill(0x333333);
+    // eye shine
+    g.circle(12.8, -2.8, 0.8).fill(0xffffff);
+    g.circle(17.8, -2.8, 0.8).fill(0xffffff);
+    // blush cheeks
+    g.ellipse(10, 2, 3, 1.8).fill({ color: 0xff8a80, alpha: 0.5 });
+    g.ellipse(19, 2, 3, 1.8).fill({ color: 0xff8a80, alpha: 0.5 });
+    // smile
+    g.arc(14.5, 1, 3, 0.2, Math.PI - 0.2).stroke({ color: 0x555555, width: 1 });
+
+    // ----- upper wing -----
+    // wing shadow
+    g.ellipse(-2, -15, 22, 5).fill({ color: 0x000000, alpha: 0.08 });
+    // wing body
+    g.ellipse(-2, -16, 22, 5).fill(colors.wing);
+    g.ellipse(-2, -16, 22, 5).stroke({ color: colors.tail, width: 1, alpha: 0.3 });
+    // wing highlight
+    g.ellipse(-4, -18, 14, 2).fill({ color: 0xffffff, alpha: 0.2 });
+
+    // ----- lower wing -----
+    g.ellipse(-2, 15, 22, 5).fill({ color: 0x000000, alpha: 0.08 });
+    g.ellipse(-2, 16, 22, 5).fill(colors.wing);
+    g.ellipse(-2, 16, 22, 5).stroke({ color: colors.tail, width: 1, alpha: 0.3 });
+
+    // ----- tail fin (vertical) -----
+    // shadow
+    g.moveTo(-24, 2).lineTo(-34, -16).lineTo(-28, -16).lineTo(-20, 0).closePath().fill({ color: 0x000000, alpha: 0.08 });
+    // fin body
+    g.moveTo(-24, 0).lineTo(-34, -18).lineTo(-28, -18).lineTo(-20, 0).closePath().fill(colors.tail);
+    // fin border
+    g.moveTo(-24, 0).lineTo(-34, -18).lineTo(-28, -18).lineTo(-20, 0).closePath().stroke({ color: colors.main, width: 1, alpha: 0.3 });
+    // fin highlight
+    g.moveTo(-23, -2).lineTo(-32, -16).lineTo(-30, -16).lineTo(-21, -1).closePath().fill({ color: 0xffffff, alpha: 0.15 });
+
+    // ----- horizontal tail -----
+    g.ellipse(-26, 0, 10, 3.5).fill(colors.tail);
+    g.ellipse(-26, -1, 7, 1.5).fill({ color: 0xffffff, alpha: 0.12 });
+
+    // ----- level decorations -----
     if (this.level >= 1) {
-      // stickers on wing
-      g.circle(-10, -12, 3).fill(0xffeb3b);
-      g.circle(-10, 12, 3).fill(0xffeb3b);
+      // star stickers on wings
+      this.drawMiniStar(g, -6, -16, 3, 0xffeb3b);
+      this.drawMiniStar(g, -6, 16, 3, 0xffeb3b);
     }
     if (this.level >= 2) {
-      // wing stripe
-      g.moveTo(-6, -16).lineTo(4, -4).lineTo(6, -5).lineTo(-4, -17).closePath().fill(0xff5722);
-      g.moveTo(-6, 16).lineTo(4, 4).lineTo(6, 5).lineTo(-4, 17).closePath().fill(0xff5722);
+      // racing stripe on body
+      g.ellipse(0, 0, 30, 13).stroke({ color: 0xff5722, width: 2, alpha: 0.6 });
     }
     if (this.level >= 3) {
-      // engine glow
-      g.circle(-30, 0, 5).fill({ color: 0x00bcd4, alpha: 0.6 });
+      // engine glow behind
+      g.circle(-28, 0, 6).fill({ color: 0x00bcd4, alpha: 0.4 });
+      g.circle(-28, 0, 4).fill({ color: 0x80deea, alpha: 0.6 });
     }
     if (this.level >= 4) {
-      // outline glow
-      g.ellipse(0, 0, 35, 17).stroke({ color: 0xffd700, width: 2, alpha: 0.7 });
+      // golden glow outline
+      g.ellipse(0, 0, 34, 17).stroke({ color: 0xffd700, width: 2.5, alpha: 0.6 });
+      g.ellipse(0, 0, 36, 19).stroke({ color: 0xffd700, width: 1, alpha: 0.3 });
     }
+  }
+
+  private drawMiniStar(g: Graphics, cx: number, cy: number, r: number, color: number) {
+    const points = 5;
+    const step = Math.PI / points;
+    const inner = r * 0.45;
+    const startAngle = -Math.PI / 2;
+    g.moveTo(cx + Math.cos(startAngle) * r, cy + Math.sin(startAngle) * r);
+    for (let i = 1; i <= points * 2; i++) {
+      const rad = i % 2 === 0 ? r : inner;
+      const angle = startAngle + i * step;
+      g.lineTo(cx + Math.cos(angle) * rad, cy + Math.sin(angle) * rad);
+    }
+    g.closePath().fill(color);
   }
 
   private getLevelColors() {
@@ -92,7 +157,14 @@ export class Airplane {
     const p = this.propeller;
     p.clear();
     p.position.set(34, 0);
-    p.moveTo(0, -8).lineTo(2, 8).lineTo(-2, 8).lineTo(0, -8).closePath().fill(0x616161);
+    // blade 1
+    p.ellipse(0, -5, 2.5, 6).fill({ color: 0x78909c, alpha: 0.8 });
+    // blade 2
+    p.ellipse(0, 5, 2.5, 6).fill({ color: 0x78909c, alpha: 0.8 });
+    // spinner hub
+    p.circle(0, 0, 3).fill(0xffd600);
+    p.circle(0, 0, 3).stroke({ color: 0xf9a825, width: 0.8 });
+    p.circle(-0.5, -0.8, 1).fill({ color: 0xffffff, alpha: 0.5 });
     p.rotation = this.propAngle;
   }
 

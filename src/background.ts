@@ -58,9 +58,13 @@ export class Background {
   private drawSky(color: number) {
     this.skyLayer.clear();
     this.skyLayer.rect(0, 0, GAME_WIDTH, GAME_HEIGHT).fill(color);
-    // gradient-like lighter band at top
-    this.skyLayer.rect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.3).fill({ color: 0xffffff, alpha: 0.1 });
-    this.skyLayer.rect(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.12).fill({ color: 0xffffff, alpha: 0.08 });
+    // smooth gradient bands (multiple thin strips to avoid hard edges)
+    const steps = 6;
+    for (let i = 0; i < steps; i++) {
+      const h = GAME_HEIGHT * (0.35 - i * 0.05);
+      const a = 0.04 + (steps - i) * 0.012;
+      this.skyLayer.rect(0, 0, GAME_WIDTH, h).fill({ color: 0xffffff, alpha: a });
+    }
   }
 
   private initClouds() {

@@ -164,10 +164,11 @@ export class WindTunnelManager {
 
 function drawStar(g: Graphics, cx: number, cy: number, outerR: number, innerR: number, points: number, color: number) {
   const step = Math.PI / points;
-  g.moveTo(cx + outerR, cy);
+  const startAngle = -Math.PI / 2;
+  g.moveTo(cx + Math.cos(startAngle) * outerR, cy + Math.sin(startAngle) * outerR);
   for (let i = 1; i <= points * 2; i++) {
     const r = i % 2 === 0 ? outerR : innerR;
-    const angle = i * step - Math.PI / 2;
+    const angle = startAngle + i * step;
     g.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
   }
   g.closePath().fill(color);

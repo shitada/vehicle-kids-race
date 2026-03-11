@@ -1,5 +1,5 @@
 import { Application, Container, Graphics } from 'pixi.js';
-import { GAME_WIDTH, GAME_HEIGHT, COURSE_LENGTH, LEVEL_THRESHOLDS, WIND_TUNNEL_DURATION } from './constants';
+import { GAME_WIDTH, GAME_HEIGHT, COURSE_LENGTH, LEVEL_THRESHOLDS, WIND_TUNNEL_DURATION, BASE_SPEED, MAX_SPEED, BOOST_MULTIPLIER, BOOST_DURATION, BARREL_ROLL_DURATION } from './constants';
 import { GameState, SaveData, loadSave, writeSave } from './state';
 import { InputManager } from './input';
 import { Airplane } from './airplane';
@@ -9,6 +9,7 @@ import { HUD } from './hud';
 import { TrailRenderer, SpeedLines, Confetti, ScreenShake, FlashOverlay } from './effects';
 import { TitleScreen, CountdownOverlay, ResultScreen } from './screens';
 import { TouchControls } from './touch';
+import { startBGM, stopBGM, setBGMSpeed, sfxCoin, sfxBoost, sfxBarrelRoll, sfxGoal, sfxWindTunnel, sfxCountdown, resumeAudio } from './audio';
 
 async function main() {
   // Wait for Google Fonts to load before rendering any text
@@ -84,6 +85,7 @@ async function main() {
   let worldX = 0;
   let raceTime = 0;
   let windTunnelActive = 0;
+  let prevCoins = 0;
   let save: SaveData = loadSave();
 
   // compute level
@@ -97,6 +99,7 @@ async function main() {
 
   function showTitle() {
     state = 'title';
+    stopBGM();
     titleScreen.container.visible = true;
     gameLayer.visible = false;
     resultScreen.hide();
@@ -124,17 +127,24 @@ async function main() {
     worldX = 0;
     raceTime = 0;
     windTunnelActive = 0;
+    prevCoins = 0;
 
     titleScreen.container.visible = false;
     resultScreen.hide();
     gameLayer.visible = true;
 
     state = 'countdown';
-    countdown.start(() => { state = 'race'; });
+    resumeAudio();
+    countdown.start(() => {
+      state = 'race';
+      startBGM();
+    });
   }
 
   function goalReached() {
     state = 'goal';
+    stopBGM();
+    sfxGoal();
     flash.flash();
     confetti.burst(GAME_WIDTH / 2, GAME_HEIGHT / 2);
     shake.trigger(6, 400);
@@ -182,6 +192,7 @@ async function main() {
         if (windMgr.update(worldX, airplane.container.y)) {
           airplane.windTunnelBurst();
           shake.trigger(3, 200);
+          sfxWindTunnel();
           windTunnelActive = WIND_TUNNEL_DURATION;
         }
         if (windTunnelActive > 0) windTunnelActive -= dt;
@@ -191,6 +202,20 @@ async function main() {
         coinMgr.draw(worldX);
         trail.draw(airplane);
 
+        // coin collect sound
+        if (coinMgr.collected > prevCoins) {
+          sfxCoin();
+          prevCoins = coinMgr.collected;
+        }
+
+        // boost / barrel roll sounds
+        if (airplane.boosting && airplane.boostTimer > BOOST_DURATION - 50) {
+          sfxBoost();
+        }
+        if (airplane.rolling && airplane.rollTimer > BARREL_ROLL_DURATION - 50) {
+          sfxBarrelRoll();
+        }
+
         // speed lines during boost
         if (airplane.boosting) {
           speedLines.show();
@@ -198,6 +223,10 @@ async function main() {
           speedLines.hide();
         }
         speedLines.update();
+
+        // BGM speed sync
+        const bgmTempo = 200 - (airplane.speed - BASE_SPEED) / (MAX_SPEED * BOOST_MULTIPLIER - BASE_SPEED) * 80;
+        setBGMSpeed(bgmTempo);
 
         raceTime += dt / 1000;
         hud.update(airplane.speed, progress, coinMgr.collected, raceTime, airplane.boostCooldown, airplane.boosting);
