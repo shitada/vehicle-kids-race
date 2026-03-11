@@ -115,16 +115,17 @@ export class TouchControls {
   }
 
   private createActionButtons() {
-    const bx = GAME_WIDTH - 60;
-    const by = GAME_HEIGHT - 180;
+    // DEBUG: extremely obvious position to test deployment
+    const bx = GAME_WIDTH / 2;
+    const by = GAME_HEIGHT / 2 - 60;
 
-    // Boost button (large)
-    this.makeActionBtn(bx, by, 34, '🔥', 0xff9800, () => {
+    // Boost button (huge for testing)
+    this.makeActionBtn(bx, by, 60, '🔥', 0xff0000, () => {
       this.input.touchBoost = true;
     });
 
-    // Barrel Roll button (small, below boost)
-    this.makeActionBtn(bx, by + 90, 28, '🌀', 0x7c4dff, () => {
+    // Barrel Roll button (huge for testing)
+    this.makeActionBtn(bx, by + 140, 50, '🌀', 0x0000ff, () => {
       this.input.touchBarrel = true;
     });
   }
