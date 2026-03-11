@@ -9,8 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-    canvas { display: block; image-rendering: auto; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden; background: #000;
+      -webkit-user-select: none; user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+    canvas { display: block; image-rendering: auto; touch-action: none; }
   </style>
 </head>
 <body>

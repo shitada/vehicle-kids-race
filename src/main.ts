@@ -26,6 +26,11 @@ async function main() {
   });
   document.body.appendChild(app.canvas);
 
+  // Prevent default touch behaviors (text selection, callout, etc.) on iPad
+  for (const evt of ['touchstart', 'touchmove', 'touchend'] as const) {
+    app.canvas.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
+  }
+
   // Responsive scaling
   function resize() {
     const scale = Math.min(window.innerWidth / GAME_WIDTH, window.innerHeight / GAME_HEIGHT);
