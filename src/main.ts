@@ -259,6 +259,16 @@ async function main() {
 
   // init
   showTitle();
+
+  // Force return to title when Safari restores page from cache (bfcache)
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) showTitle();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && state !== 'title') {
+      showTitle();
+    }
+  });
 }
 
 main().catch(console.error);
