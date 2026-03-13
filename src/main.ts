@@ -58,7 +58,7 @@ async function main() {
   const flash = new FlashOverlay();
 
   // --- Screens ---
-  const titleScreen = new TitleScreen();
+  let titleScreen: TitleScreen = new TitleScreen();
   const countdown = new CountdownOverlay();
   const resultScreen = new ResultScreen();
 
@@ -105,18 +105,25 @@ async function main() {
   function showTitle() {
     state = 'title';
     stopBGM();
-    titleScreen.container.visible = true;
     gameLayer.visible = false;
     resultScreen.hide();
     countdown.container.visible = false;
 
     // recreate title to update records
-    titleScreen.container.removeChildren();
+    const oldContainer = titleScreen.container;
+    const parent = oldContainer.parent;
+    const idx = parent ? parent.children.indexOf(oldContainer) : -1;
+    oldContainer.destroy({ children: true });
+
     const newTitle = new TitleScreen();
     newTitle.setOnStart(startGame);
-    for (const child of newTitle.container.children) {
-      titleScreen.container.addChild(child);
+    titleScreen = newTitle;
+    if (parent && idx >= 0) {
+      parent.addChildAt(newTitle.container, idx);
+    } else {
+      app.stage.addChild(newTitle.container);
     }
+    newTitle.container.visible = true;
   }
 
   function startGame() {
