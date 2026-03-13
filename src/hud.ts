@@ -1,10 +1,12 @@
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import { GAME_WIDTH, GAME_HEIGHT, MAX_SPEED, BOOST_MULTIPLIER, BOOST_COOLDOWN, TOTAL_COINS, ZONES, COURSE_LENGTH } from './constants';
 import { STYLE_HUD, STYLE_HUD_COIN, STYLE_SMALL } from './styles';
+import { sfxClick } from './audio';
 
-/** HUD: speedometer, progress bar, coin counter, timer, boost gauge */
+/** HUD: speedometer, progress bar, coin counter, timer, boost gauge, home button */
 export class HUD {
   container = new Container();
+  private onHome: (() => void) | null = null;
 
   private meterBg: Graphics;
   private meterNeedle: Graphics;
@@ -114,7 +116,28 @@ export class HUD {
     this.boostIcon = new Text({ text: '🔥', style: { fontSize: 24 } });
     this.boostIcon.position.set(bgX - 2, bgY - 6);
     this.container.addChild(this.boostIcon);
+
+    // --- Home button (top-left corner) ---
+    const homeBtn = new Container();
+    const homeBg = new Graphics();
+    homeBg.roundRect(0, 0, 40, 40, 12).fill({ color: 0x000000, alpha: 0.35 });
+    homeBg.roundRect(0, 0, 40, 40, 12).stroke({ color: 0xffffff, width: 1.5, alpha: 0.3 });
+    homeBtn.addChild(homeBg);
+    const homeIcon = new Text({ text: '🏠', style: new TextStyle({ fontSize: 22 }) });
+    homeIcon.anchor.set(0.5);
+    homeIcon.position.set(20, 20);
+    homeBtn.addChild(homeIcon);
+    homeBtn.position.set(10, 6);
+    homeBtn.eventMode = 'static';
+    homeBtn.cursor = 'pointer';
+    homeBtn.on('pointerdown', () => {
+      sfxClick();
+      if (this.onHome) this.onHome();
+    });
+    this.container.addChild(homeBtn);
   }
+
+  setOnHome(fn: () => void) { this.onHome = fn; }
 
   update(speed: number, progress: number, coins: number, time: number, boostCooldown: number, boosting: boolean) {
     // speedometer needle

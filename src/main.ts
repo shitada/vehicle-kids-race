@@ -175,6 +175,7 @@ async function main() {
   // --- Callbacks ---
   titleScreen.setOnStart(startGame);
   resultScreen.setCallbacks(startGame, showTitle);
+  hud.setOnHome(showTitle);
 
   // --- Main loop ---
   app.ticker.add((ticker) => {

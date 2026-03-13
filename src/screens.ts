@@ -187,6 +187,25 @@ export class ResultScreen {
     panel.roundRect(GAME_WIDTH / 2 - 220, 40, 440, GAME_HEIGHT - 80, 24).stroke({ color: 0xe0e0e0, width: 1 });
     this.container.addChild(panel);
 
+    // Home button (top-right of panel)
+    const homeBtn = new Container();
+    const homeBg = new Graphics();
+    homeBg.roundRect(0, 0, 40, 40, 12).fill({ color: 0x000000, alpha: 0.08 });
+    homeBg.roundRect(0, 0, 40, 40, 12).stroke({ color: 0xcccccc, width: 1 });
+    homeBtn.addChild(homeBg);
+    const homeIcon = new Text({ text: '🏠', style: { fontSize: 22 } });
+    homeIcon.anchor.set(0.5);
+    homeIcon.position.set(20, 20);
+    homeBtn.addChild(homeIcon);
+    homeBtn.position.set(GAME_WIDTH / 2 + 170, 48);
+    homeBtn.eventMode = 'static';
+    homeBtn.cursor = 'pointer';
+    homeBtn.on('pointerdown', () => {
+      sfxClick();
+      if (this.onTitle) this.onTitle();
+    });
+    this.container.addChild(homeBtn);
+
     // goal text
     const goalText = new Text({ text: '🏆 ゴール！', style: STYLE_RESULT_HEADING });
     goalText.anchor.set(0.5, 0);
