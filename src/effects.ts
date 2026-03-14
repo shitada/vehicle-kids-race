@@ -1,4 +1,4 @@
-import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import { GAME_WIDTH, GAME_HEIGHT } from './constants';
 import { Airplane } from './airplane';
 
@@ -78,77 +78,52 @@ export class SpeedLines {
 interface CuteParticle {
   x: number; y: number;
   vx: number; vy: number;
-  emoji: string;
   size: number;
   life: number;
   spin: number;
   spinSpeed: number;
-  wobble: number;
-  wobbleSpeed: number;
+  color: number;
   delay: number;
 }
 
-const CUTE_EMOJIS = ['⭐', '💖', '🌟', '🎵', '✨', '🌈', '💫', '🎀', '🩷', '🫧'];
+const STAR_COLORS = [0xffd700, 0xffeb3b, 0xffc107, 0xfff176, 0xffe082];
 
 export class Confetti {
   container = new Container();
   private particles: CuteParticle[] = [];
-  private textPool: Text[] = [];
   private timer = 0;
 
   burst(cx: number, cy: number) {
-    // Wave 1: big burst from center
-    for (let i = 0; i < 30; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.5 + Math.random() * 3;
+    // Wave 1: small burst of stars from center (12 particles)
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+      const speed = 1.5 + Math.random() * 2;
       this.particles.push({
-        x: cx + (Math.random() - 0.5) * 60,
-        y: cy + (Math.random() - 0.5) * 40,
+        x: cx + (Math.random() - 0.5) * 30,
+        y: cy + (Math.random() - 0.5) * 20,
         vx: Math.cos(angle) * speed,
-        vy: -1.5 - Math.random() * 2.5,
-        emoji: CUTE_EMOJIS[Math.floor(Math.random() * CUTE_EMOJIS.length)],
-        size: 18 + Math.random() * 20,
+        vy: Math.sin(angle) * speed - 1,
+        size: 6 + Math.random() * 8,
         life: 1,
-        spin: Math.random() * 0.3 - 0.15,
-        spinSpeed: (Math.random() - 0.5) * 0.08,
-        wobble: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.03 + Math.random() * 0.04,
+        spin: Math.random() * Math.PI,
+        spinSpeed: (Math.random() - 0.5) * 0.06,
+        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
         delay: 0,
       });
     }
-    // Wave 2: delayed shower from top
-    for (let i = 0; i < 25; i++) {
+    // Wave 2: gentle rain from top (8 particles, delayed)
+    for (let i = 0; i < 8; i++) {
       this.particles.push({
-        x: Math.random() * GAME_WIDTH,
-        y: -20 - Math.random() * 60,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: 0.5 + Math.random() * 1.2,
-        emoji: CUTE_EMOJIS[Math.floor(Math.random() * CUTE_EMOJIS.length)],
-        size: 14 + Math.random() * 16,
+        x: 100 + Math.random() * (GAME_WIDTH - 200),
+        y: -10 - Math.random() * 30,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: 0.4 + Math.random() * 0.8,
+        size: 5 + Math.random() * 6,
         life: 1,
-        spin: 0,
-        spinSpeed: (Math.random() - 0.5) * 0.05,
-        wobble: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.02 + Math.random() * 0.03,
-        delay: 400 + Math.random() * 600,
-      });
-    }
-    // Wave 3: side bursts
-    for (let i = 0; i < 10; i++) {
-      const fromLeft = i < 5;
-      this.particles.push({
-        x: fromLeft ? -10 : GAME_WIDTH + 10,
-        y: GAME_HEIGHT * 0.3 + Math.random() * GAME_HEIGHT * 0.4,
-        vx: fromLeft ? 1.5 + Math.random() * 2 : -1.5 - Math.random() * 2,
-        vy: -1 - Math.random() * 1.5,
-        emoji: CUTE_EMOJIS[Math.floor(Math.random() * CUTE_EMOJIS.length)],
-        size: 20 + Math.random() * 14,
-        life: 1,
-        spin: 0,
-        spinSpeed: (Math.random() - 0.5) * 0.06,
-        wobble: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.03 + Math.random() * 0.03,
-        delay: 200 + Math.random() * 400,
+        spin: Math.random() * Math.PI,
+        spinSpeed: (Math.random() - 0.5) * 0.04,
+        color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
+        delay: 300 + Math.random() * 500,
       });
     }
     this.timer = 0;
@@ -158,57 +133,54 @@ export class Confetti {
     this.container.removeChildren();
     if (this.particles.length === 0) return;
 
-    this.timer += 16; // approx dt
+    this.timer += 16;
 
-    // draw sparkle background ring (fades out)
-    if (this.timer < 800) {
-      const ringAlpha = Math.max(0, 1 - this.timer / 800) * 0.3;
-      const ringScale = 1 + this.timer / 200;
-      const g = new Graphics();
-      g.circle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 40 * ringScale)
-        .stroke({ color: 0xffd700, width: 3, alpha: ringAlpha });
-      g.circle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 25 * ringScale)
-        .stroke({ color: 0xff80ab, width: 2, alpha: ringAlpha * 0.7 });
-      this.container.addChild(g);
+    const g = new Graphics();
+
+    // expanding ring (fades quickly)
+    if (this.timer < 600) {
+      const ringAlpha = Math.max(0, 1 - this.timer / 600) * 0.25;
+      const ringScale = 1 + this.timer / 250;
+      g.circle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 30 * ringScale)
+        .stroke({ color: 0xffd700, width: 2, alpha: ringAlpha });
     }
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
 
-      // delay handling
-      if (p.delay > 0) {
-        p.delay -= 16;
-        continue;
-      }
+      if (p.delay > 0) { p.delay -= 16; continue; }
 
-      // physics: gentle float with wobble
-      p.wobble += p.wobbleSpeed;
-      p.x += p.vx + Math.sin(p.wobble) * 0.6;
+      p.x += p.vx;
       p.y += p.vy;
-      p.vy *= 0.995; // gentle deceleration
-      p.vx *= 0.99;
+      p.vx *= 0.98;
+      p.vy *= 0.98;
       p.spin += p.spinSpeed;
-      p.life -= 0.006;
+      p.life -= 0.01;
 
-      if (p.life <= 0) {
-        this.particles.splice(i, 1);
-        continue;
-      }
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
 
-      const txt = new Text({
-        text: p.emoji,
-        style: new TextStyle({ fontSize: p.size }),
-      });
-      txt.anchor.set(0.5);
-      txt.position.set(p.x, p.y);
-      txt.rotation = p.spin;
-      txt.alpha = Math.min(1, p.life * 2); // fade out last 50%
-      // gentle scale pulse
-      const pulse = 1 + Math.sin(p.wobble * 2) * 0.1;
-      txt.scale.set(pulse);
-
-      this.container.addChild(txt);
+      const alpha = Math.min(1, p.life * 2.5);
+      this.drawStar(g, p.x, p.y, p.size, p.spin, p.color, alpha);
     }
+
+    this.container.addChild(g);
+  }
+
+  /** Draw a 4-point star shape using Graphics */
+  private drawStar(g: Graphics, x: number, y: number, r: number, rotation: number, color: number, alpha: number) {
+    const points = 4;
+    const innerR = r * 0.4;
+    const coords: number[] = [];
+    for (let i = 0; i < points * 2; i++) {
+      const angle = rotation + (i * Math.PI) / points;
+      const radius = i % 2 === 0 ? r : innerR;
+      coords.push(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+    }
+    g.moveTo(coords[0], coords[1]);
+    for (let i = 2; i < coords.length; i += 2) {
+      g.lineTo(coords[i], coords[i + 1]);
+    }
+    g.closePath().fill({ color, alpha });
   }
 
   get active() { return this.particles.length > 0; }
