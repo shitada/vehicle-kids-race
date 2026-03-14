@@ -363,26 +363,20 @@
       filter: brightness(1.3);
       transform: scale(0.95);
     }
-    .touch-right-area {
-      position: absolute;
-      right: 16px; bottom: 24px;
-      display: flex; flex-direction: column;
-      align-items: center; gap: 14px;
-    }
-    .touch-right-row {
-      display: flex; gap: 14px; align-items: center;
-    }
     .touch-boost-btn {
+      right: 26px; bottom: 156px;
       width: 68px; height: 68px;
       background: radial-gradient(circle at 40% 35%, #ffb74d, #ff9800);
       font-size: 28px;
     }
     .touch-forward-btn {
+      right: 104px; bottom: 158px;
       width: 64px; height: 64px;
       background: radial-gradient(circle at 40% 35%, #81d4fa, #29b6f6);
       font-size: 26px;
     }
     .touch-barrel-btn {
+      right: 32px; bottom: 66px;
       width: 56px; height: 56px;
       background: radial-gradient(circle at 40% 35%, #b388ff, #7c4dff);
       font-size: 24px;
@@ -468,13 +462,9 @@
           <div class="touch-dpad-btn" data-dir="up">▲</div>
           <div class="touch-dpad-btn" data-dir="down">▼</div>
         </div>
-        <div class="touch-right-area">
-          <div class="touch-right-row">
-            <div class="touch-action-btn touch-forward-btn" id="touch-forward">▶</div>
-            <div class="touch-action-btn touch-boost-btn" id="touch-boost">🔥</div>
-          </div>
-          <div class="touch-action-btn touch-barrel-btn" id="touch-barrel">🌀</div>
-        </div>
+        <div class="touch-action-btn touch-forward-btn" id="touch-forward">▶</div>
+        <div class="touch-action-btn touch-boost-btn" id="touch-boost">🔥</div>
+        <div class="touch-action-btn touch-barrel-btn" id="touch-barrel">🌀</div>
       </div>
     </div>
   </div>
