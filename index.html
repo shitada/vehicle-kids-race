@@ -315,37 +315,45 @@
     #touch-controls {
       position: absolute; inset: 0;
       pointer-events: none;
-      opacity: 0.55;
+      opacity: 0.6;
     }
     #touch-controls > * { pointer-events: auto; }
     .touch-dpad-base {
       position: absolute;
-      left: 20px; bottom: 20px;
-      width: 140px; height: 140px;
+      left: 12px; bottom: 12px;
+      width: 180px; height: 180px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.18);
-      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.15);
+      border: 2.5px solid rgba(255,255,255,0.18);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     }
     .touch-dpad-btn {
       position: absolute;
-      width: 40px; height: 40px;
+      width: 56px; height: 56px;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.5);
-      border-radius: 10px;
-      font-size: 18px; font-weight: bold;
-      color: #555;
-      text-shadow: 0 1px 0 #fff;
-      box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.55);
+      border-radius: 14px;
+      font-size: 22px; font-weight: bold;
+      color: #444;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
       user-select: none;
       -webkit-user-select: none;
+      transition: background 0.08s, transform 0.08s;
     }
     .touch-dpad-btn:active, .touch-dpad-btn.pressed {
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.9);
+      transform: translate(-50%, -50%) scale(0.93);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5);
     }
-    .touch-dpad-btn.up { top: 6px; left: 50%; transform: translateX(-50%); }
-    .touch-dpad-btn.down { bottom: 6px; left: 50%; transform: translateX(-50%); }
-    .touch-dpad-btn.left { left: 6px; top: 50%; transform: translateY(-50%); }
-    .touch-dpad-btn.right { right: 6px; top: 50%; transform: translateY(-50%); }
+    .touch-dpad-btn.up    { top: 4px; left: 50%; transform: translateX(-50%); }
+    .touch-dpad-btn.down  { bottom: 4px; left: 50%; transform: translateX(-50%); }
+    .touch-dpad-btn.left  { left: 4px; top: 50%; transform: translateY(-50%); }
+    .touch-dpad-btn.right { right: 4px; top: 50%; transform: translateY(-50%); }
+    .touch-dpad-btn.up.pressed    { transform: translateX(-50%) scale(0.93); }
+    .touch-dpad-btn.down.pressed  { transform: translateX(-50%) scale(0.93); }
+    .touch-dpad-btn.left.pressed  { transform: translateY(-50%) scale(0.93); }
+    .touch-dpad-btn.right.pressed { transform: translateY(-50%) scale(0.93); }
 
     .touch-action-btn {
       position: absolute;
