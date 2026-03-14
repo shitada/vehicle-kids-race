@@ -1,6 +1,6 @@
 /**
  * DOM-based touch controls for iPad/tablet.
- * Left: Up/Down buttons | Right: Forward + Boost + Barrel Roll
+ * Left: Up/Down buttons (slide-switchable) | Right: Forward + Boost + Barrel Roll
  */
 import { InputManager } from './input';
 
@@ -14,29 +14,57 @@ export class DomTouchControls {
     if (!('ontouchstart' in window)) return;
     this.root.classList.remove('hidden');
 
-    // D-Pad buttons (up/down only)
-    const dirs: Record<string, 'touchUp' | 'touchDown'> = {
-      up: 'touchUp',
-      down: 'touchDown',
+    // --- D-Pad: up/down with slide support ---
+    const upBtn = this.root.querySelector<HTMLElement>('[data-dir="up"]')!;
+    const downBtn = this.root.querySelector<HTMLElement>('[data-dir="down"]')!;
+    const dpadBase = this.root.querySelector<HTMLElement>('.touch-dpad-base')!;
+
+    // Track which d-pad direction is active per pointer
+    let activeDpadDir: 'up' | 'down' | null = null;
+    let dpadPointerId: number | null = null;
+
+    const setDpad = (dir: 'up' | 'down' | null) => {
+      if (dir === activeDpadDir) return;
+      // release previous
+      if (activeDpadDir === 'up') { input.touchUp = false; upBtn.classList.remove('pressed'); }
+      if (activeDpadDir === 'down') { input.touchDown = false; downBtn.classList.remove('pressed'); }
+      activeDpadDir = dir;
+      // activate new
+      if (dir === 'up') { input.touchUp = true; upBtn.classList.add('pressed'); }
+      if (dir === 'down') { input.touchDown = true; downBtn.classList.add('pressed'); }
     };
 
-    for (const btn of this.root.querySelectorAll<HTMLElement>('.touch-dpad-btn')) {
-      const dir = btn.dataset.dir as string;
-      const prop = dirs[dir];
-      if (!prop) continue;
+    const hitTestDpad = (x: number, y: number): 'up' | 'down' | null => {
+      const upRect = upBtn.getBoundingClientRect();
+      const downRect = downBtn.getBoundingClientRect();
+      if (x >= upRect.left && x <= upRect.right && y >= upRect.top && y <= upRect.bottom) return 'up';
+      if (x >= downRect.left && x <= downRect.right && y >= downRect.top && y <= downRect.bottom) return 'down';
+      return null;
+    };
 
-      btn.addEventListener('pointerdown', () => {
-        (input as any)[prop] = true;
-        btn.classList.add('pressed');
-      });
-      const release = () => {
-        (input as any)[prop] = false;
-        btn.classList.remove('pressed');
-      };
-      btn.addEventListener('pointerup', release);
-      btn.addEventListener('pointerleave', release);
-      btn.addEventListener('pointercancel', release);
-    }
+    const onDpadDown = (e: PointerEvent, dir: 'up' | 'down') => {
+      dpadPointerId = e.pointerId;
+      setDpad(dir);
+      // Capture pointer on the base so we get move/up events even outside the button
+      dpadBase.setPointerCapture(e.pointerId);
+    };
+
+    upBtn.addEventListener('pointerdown', (e) => onDpadDown(e, 'up'));
+    downBtn.addEventListener('pointerdown', (e) => onDpadDown(e, 'down'));
+
+    dpadBase.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== dpadPointerId) return;
+      const dir = hitTestDpad(e.clientX, e.clientY);
+      setDpad(dir);
+    });
+
+    const releaseDpad = (e: PointerEvent) => {
+      if (e.pointerId !== dpadPointerId) return;
+      setDpad(null);
+      dpadPointerId = null;
+    };
+    dpadBase.addEventListener('pointerup', releaseDpad);
+    dpadBase.addEventListener('pointercancel', releaseDpad);
 
     // Forward button (right arrow, next to boost)
     this.bindHold('touch-forward', () => { input.touchRight = true; }, () => { input.touchRight = false; });
