@@ -1,6 +1,6 @@
 /**
  * DOM-based touch controls for iPad/tablet.
- * D-Pad (left) + Boost & Barrel Roll buttons (right).
+ * Left: Up/Down buttons | Right: Forward + Boost + Barrel Roll
  */
 import { InputManager } from './input';
 
@@ -14,17 +14,15 @@ export class DomTouchControls {
     if (!('ontouchstart' in window)) return;
     this.root.classList.remove('hidden');
 
-    // D-Pad buttons
-    const dirs: Record<string, keyof InputManager> = {
+    // D-Pad buttons (up/down only)
+    const dirs: Record<string, 'touchUp' | 'touchDown'> = {
       up: 'touchUp',
       down: 'touchDown',
-      left: 'touchLeft',
-      right: 'touchRight',
     };
 
     for (const btn of this.root.querySelectorAll<HTMLElement>('.touch-dpad-btn')) {
       const dir = btn.dataset.dir as string;
-      const prop = dirs[dir] as 'touchUp' | 'touchDown' | 'touchLeft' | 'touchRight';
+      const prop = dirs[dir];
       if (!prop) continue;
 
       btn.addEventListener('pointerdown', () => {
@@ -40,26 +38,42 @@ export class DomTouchControls {
       btn.addEventListener('pointercancel', release);
     }
 
+    // Forward button (right arrow, next to boost)
+    this.bindHold('touch-forward', () => { input.touchRight = true; }, () => { input.touchRight = false; });
+
     // Boost button
-    const boostBtn = document.getElementById('touch-boost')!;
-    boostBtn.addEventListener('pointerdown', () => {
-      input.touchBoost = true;
-      boostBtn.classList.add('pressed');
-    });
-    const releaseBoost = () => boostBtn.classList.remove('pressed');
-    boostBtn.addEventListener('pointerup', releaseBoost);
-    boostBtn.addEventListener('pointerleave', releaseBoost);
-    boostBtn.addEventListener('pointercancel', releaseBoost);
+    this.bindTap('touch-boost', () => { input.touchBoost = true; });
 
     // Barrel roll button
-    const barrelBtn = document.getElementById('touch-barrel')!;
-    barrelBtn.addEventListener('pointerdown', () => {
-      input.touchBarrel = true;
-      barrelBtn.classList.add('pressed');
+    this.bindTap('touch-barrel', () => { input.touchBarrel = true; });
+  }
+
+  /** Bind a hold-to-activate button (pressed while held, released on up) */
+  private bindHold(id: string, onDown: () => void, onUp: () => void) {
+    const btn = document.getElementById(id)!;
+    btn.addEventListener('pointerdown', () => {
+      onDown();
+      btn.classList.add('pressed');
     });
-    const releaseBarrel = () => barrelBtn.classList.remove('pressed');
-    barrelBtn.addEventListener('pointerup', releaseBarrel);
-    barrelBtn.addEventListener('pointerleave', releaseBarrel);
-    barrelBtn.addEventListener('pointercancel', releaseBarrel);
+    const release = () => {
+      onUp();
+      btn.classList.remove('pressed');
+    };
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointerleave', release);
+    btn.addEventListener('pointercancel', release);
+  }
+
+  /** Bind a single-tap button (fires once on press) */
+  private bindTap(id: string, onTap: () => void) {
+    const btn = document.getElementById(id)!;
+    btn.addEventListener('pointerdown', () => {
+      onTap();
+      btn.classList.add('pressed');
+    });
+    const release = () => btn.classList.remove('pressed');
+    btn.addEventListener('pointerup', release);
+    btn.addEventListener('pointerleave', release);
+    btn.addEventListener('pointercancel', release);
   }
 }
