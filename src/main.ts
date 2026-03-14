@@ -1,15 +1,14 @@
-import { Application, Container, Graphics } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { GAME_WIDTH, GAME_HEIGHT, COURSE_LENGTH, LEVEL_THRESHOLDS, WIND_TUNNEL_DURATION, BASE_SPEED, MAX_SPEED, BOOST_MULTIPLIER, BOOST_DURATION, BARREL_ROLL_DURATION } from './constants';
 import { GameState, SaveData, loadSave, writeSave } from './state';
 import { InputManager } from './input';
 import { Airplane } from './airplane';
 import { Background } from './background';
 import { CoinManager, WindTunnelManager } from './objects';
-import { HUD } from './hud';
 import { TrailRenderer, SpeedLines, Confetti, ScreenShake, FlashOverlay } from './effects';
-import { TitleScreen, CountdownOverlay, ResultScreen } from './screens';
-import { TouchControls } from './touch';
-import { startBGM, stopBGM, setBGMSpeed, sfxCoin, sfxBoost, sfxBarrelRoll, sfxGoal, sfxWindTunnel, sfxCountdown, resumeAudio } from './audio';
+import { DomTitleScreen, DomCountdown, DomHUD, DomResultScreen } from './dom-ui';
+import { DomTouchControls } from './dom-touch';
+import { startBGM, stopBGM, setBGMSpeed, sfxCoin, sfxBoost, sfxBarrelRoll, sfxGoal, sfxWindTunnel, resumeAudio } from './audio';
 
 async function main() {
   // Wait for Google Fonts to load before rendering any text
@@ -24,22 +23,36 @@ async function main() {
     resolution: Math.max(window.devicePixelRatio || 1, 2),
     autoDensity: true,
   });
-  document.body.appendChild(app.canvas);
+  const wrapper = document.getElementById('game-wrapper')!;
+  const uiOverlay = document.getElementById('ui-overlay')!;
+  wrapper.insertBefore(app.canvas, uiOverlay);
 
   // Prevent default touch behaviors (text selection, callout, etc.) on iPad
   for (const evt of ['touchstart', 'touchmove', 'touchend'] as const) {
     app.canvas.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
   }
 
-  // Responsive scaling
+  // Responsive scaling — scale both canvas and DOM overlay together
   function resize() {
     const scale = Math.min(window.innerWidth / GAME_WIDTH, window.innerHeight / GAME_HEIGHT);
     const canvas = app.canvas;
-    canvas.style.width = `${GAME_WIDTH * scale}px`;
-    canvas.style.height = `${GAME_HEIGHT * scale}px`;
-    canvas.style.position = 'absolute';
-    canvas.style.left = `${(window.innerWidth - GAME_WIDTH * scale) / 2}px`;
-    canvas.style.top = `${(window.innerHeight - GAME_HEIGHT * scale) / 2}px`;
+    const w = GAME_WIDTH * scale;
+    const h = GAME_HEIGHT * scale;
+    const left = (window.innerWidth - w) / 2;
+    const top = (window.innerHeight - h) / 2;
+
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = `${left}px`;
+    wrapper.style.top = `${top}px`;
+    wrapper.style.width = `${w}px`;
+    wrapper.style.height = `${h}px`;
+
+    uiOverlay.style.transform = `scale(${scale})`;
+    uiOverlay.style.width = `${GAME_WIDTH}px`;
+    uiOverlay.style.height = `${GAME_HEIGHT}px`;
   }
   resize();
   window.addEventListener('resize', resize);
@@ -50,20 +63,20 @@ async function main() {
   const airplane = new Airplane();
   const coinMgr = new CoinManager();
   const windMgr = new WindTunnelManager();
-  const hud = new HUD();
   const trail = new TrailRenderer();
   const speedLines = new SpeedLines();
   const confetti = new Confetti();
   const shake = new ScreenShake();
   const flash = new FlashOverlay();
 
-  // --- Screens ---
-  let titleScreen: TitleScreen = new TitleScreen();
-  const countdown = new CountdownOverlay();
-  const resultScreen = new ResultScreen();
+  // --- DOM UI ---
+  const titleScreen = new DomTitleScreen();
+  const countdown = new DomCountdown();
+  const hud = new DomHUD();
+  const resultScreen = new DomResultScreen();
 
   // --- Touch ---
-  const touchControls = new TouchControls(input);
+  const _touchControls = new DomTouchControls(input);
 
   // --- Scene containers ---
   const gameLayer = new Container();
@@ -76,14 +89,9 @@ async function main() {
     speedLines.container,
     confetti.container,
     flash.container,
-    hud.container,
-    touchControls.container,
   );
 
   app.stage.addChild(gameLayer);
-  app.stage.addChild(countdown.container);
-  app.stage.addChild(titleScreen.container);
-  app.stage.addChild(resultScreen.container);
 
   // --- State ---
   let state: GameState = 'title';
@@ -107,23 +115,9 @@ async function main() {
     stopBGM();
     gameLayer.visible = false;
     resultScreen.hide();
-    countdown.container.visible = false;
-
-    // recreate title to update records
-    const oldContainer = titleScreen.container;
-    const parent = oldContainer.parent;
-    const idx = parent ? parent.children.indexOf(oldContainer) : -1;
-    oldContainer.destroy({ children: true });
-
-    const newTitle = new TitleScreen();
-    newTitle.setOnStart(startGame);
-    titleScreen = newTitle;
-    if (parent && idx >= 0) {
-      parent.addChildAt(newTitle.container, idx);
-    } else {
-      app.stage.addChild(newTitle.container);
-    }
-    newTitle.container.visible = true;
+    countdown.hide();
+    hud.hide();
+    titleScreen.show();
   }
 
   function startGame() {
@@ -141,9 +135,10 @@ async function main() {
     windTunnelActive = 0;
     prevCoins = 0;
 
-    titleScreen.container.visible = false;
+    titleScreen.hide();
     resultScreen.hide();
     gameLayer.visible = true;
+    hud.show();
 
     state = 'countdown';
     resumeAudio();
@@ -175,6 +170,7 @@ async function main() {
     // show result after confetti settles
     setTimeout(() => {
       state = 'result';
+      hud.hide();
       resultScreen.show(raceTime, coinMgr.collected, isNewBest);
     }, 2000);
   }

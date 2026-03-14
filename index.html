@@ -14,11 +14,452 @@
       -webkit-user-select: none; user-select: none;
       -webkit-touch-callout: none;
       touch-action: none;
+      font-family: "Zen Maru Gothic", "Hiragino Maru Gothic Pro", "BIZ UDGothic", sans-serif;
     }
     canvas { display: block; image-rendering: auto; touch-action: none; }
+
+    /* ===== DOM UI Overlay ===== */
+    #game-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 960px; height: 540px;
+      pointer-events: none;
+      overflow: hidden;
+      transform-origin: top left;
+    }
+    #ui-overlay * { pointer-events: auto; }
+
+    /* --- Title Screen --- */
+    #title-screen {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: linear-gradient(180deg, #b3e5fc 0%, #87ceeb 40%, #4fc3f7 100%);
+    }
+    .title-clouds {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .title-cloud {
+      position: absolute;
+      background: rgba(255,255,255,0.75);
+      border-radius: 50%;
+      filter: blur(2px);
+    }
+    .title-heading {
+      font-size: 48px; font-weight: 900;
+      color: #fff;
+      text-shadow: 0 3px 0 #1565c0, 0 5px 10px rgba(13,71,161,0.4);
+      letter-spacing: 2px;
+      z-index: 1;
+      margin-bottom: 12px;
+    }
+    .title-record {
+      font-size: 20px; font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      text-align: center;
+      line-height: 1.6;
+      z-index: 1;
+      margin-bottom: 24px;
+    }
+    .title-btn {
+      font-size: 32px; font-weight: 900;
+      color: #fff;
+      background: linear-gradient(180deg, #ffb74d 0%, #ff9800 40%, #e65100 100%);
+      border: none; border-radius: 30px;
+      padding: 10px 48px;
+      cursor: pointer;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+      box-shadow: 0 4px 0 #bf360c, 0 6px 12px rgba(0,0,0,0.3);
+      transition: transform 0.1s, box-shadow 0.1s;
+      z-index: 1;
+      margin-bottom: 16px;
+    }
+    .title-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #bf360c, 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .title-sub {
+      font-size: 18px; font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.35);
+      z-index: 1;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    /* --- Countdown --- */
+    #countdown-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .countdown-text {
+      font-size: 120px; font-weight: 900;
+      color: #fff;
+      text-shadow: 0 4px 0 #ff6d00, 0 7px 16px rgba(230,81,0,0.5);
+      transition: transform 0.15s ease-out, opacity 0.15s;
+    }
+
+    /* --- HUD --- */
+    #hud-layer {
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+    #hud-layer > * { pointer-events: auto; }
+
+    .hud-timer {
+      position: absolute;
+      top: 36px; left: 50%; transform: translateX(-50%);
+      font-size: 22px; font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 0 8px rgba(0,0,0,0.2);
+    }
+    .hud-coins {
+      position: absolute;
+      top: 38px; left: 14px;
+      font-size: 22px; font-weight: 700;
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(62,39,35,0.6), 0 0 6px rgba(0,0,0,0.2);
+    }
+    .hud-home {
+      position: absolute;
+      top: 6px; left: 10px;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      font-size: 22px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .hud-home:active { background: rgba(0,0,0,0.55); }
+
+    /* Progress bar */
+    .hud-progress-wrap {
+      position: absolute;
+      top: 16px; left: 60px; right: 60px;
+      height: 16px;
+      background: rgba(26,26,46,0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .hud-progress-fill {
+      height: 100%; border-radius: 8px;
+      background: linear-gradient(180deg, #81d4fa 0%, #4fc3f7 50%, #29b6f6 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+      transition: width 0.1s linear;
+      position: relative;
+    }
+    .hud-progress-plane {
+      position: absolute; right: -10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+    }
+
+    /* Speedometer */
+    .hud-speedo {
+      position: absolute;
+      top: 25px; right: 20px;
+      width: 80px; height: 80px;
+    }
+    .hud-speedo svg {
+      width: 100%; height: 100%;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+    .hud-speedo-label {
+      position: absolute;
+      bottom: 12px; left: 50%; transform: translateX(-50%);
+      font-size: 11px; font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+
+    /* Boost gauge */
+    .hud-boost-wrap {
+      position: absolute;
+      left: 20px; bottom: 195px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .hud-boost-icon { font-size: 24px; }
+    .hud-boost-bar {
+      width: 100px; height: 22px;
+      background: rgba(26,26,46,0.6);
+      border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.2);
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .hud-boost-fill {
+      height: 100%; border-radius: 11px;
+      transition: width 0.15s, background 0.15s;
+    }
+    .hud-boost-fill.ready {
+      width: 100%;
+      background: linear-gradient(180deg, #66bb6a, #4caf50);
+    }
+    .hud-boost-fill.active {
+      width: 100%;
+      background: linear-gradient(180deg, #ffb74d, #ff9800);
+    }
+    .hud-boost-fill.cooldown {
+      background: #9e9e9e;
+    }
+
+    /* --- Result Screen --- */
+    #result-screen {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6);
+    }
+    .result-panel {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px 40px 24px;
+      width: 420px;
+      max-height: 460px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 1px #e0e0e0;
+      display: flex; flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .result-home {
+      position: absolute; top: 10px; right: 14px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.06);
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .result-home:active { background: rgba(0,0,0,0.12); }
+    .result-heading {
+      font-size: 44px; font-weight: 900;
+      color: #ff6d00;
+      text-shadow: 0 2px 0 #fff, 0 4px 8px rgba(230,81,0,0.3);
+      margin-bottom: 4px;
+    }
+    .result-stars {
+      font-size: 40px;
+      margin-bottom: 2px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    }
+    .result-title {
+      font-size: 24px; font-weight: 900;
+      color: #333;
+      text-shadow: 0 1px 0 #fff;
+      margin-bottom: 8px;
+    }
+    .result-body {
+      font-size: 22px; font-weight: 700;
+      color: #333;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+      margin-bottom: 4px;
+    }
+    .result-accent {
+      font-size: 22px; font-weight: 900;
+      color: #ff1744;
+      text-shadow: 0 1px 0 #fff;
+      margin-bottom: 4px;
+    }
+    .result-photo {
+      margin: 8px 0;
+      border: 4px solid #ffd700;
+      border-radius: 10px;
+      background: #f5f5f5;
+      width: 160px; height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+    }
+    .result-photo-label {
+      font-size: 13px; font-weight: 700;
+      color: #999;
+      margin-bottom: 12px;
+    }
+    .result-btn {
+      width: 200px; padding: 8px 0;
+      border: none; border-radius: 20px;
+      font-family: inherit;
+      font-size: 20px; font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .result-btn:active {
+      transform: translateY(2px);
+    }
+    .result-btn-retry {
+      background: linear-gradient(180deg, #66bb6a 0%, #4caf50 100%);
+      box-shadow: 0 3px 0 #2e7d32, 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .result-btn-retry:active { box-shadow: 0 1px 0 #2e7d32; }
+    .result-btn-title {
+      background: linear-gradient(180deg, #42a5f5 0%, #2196f3 100%);
+      box-shadow: 0 3px 0 #1565c0, 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .result-btn-title:active { box-shadow: 0 1px 0 #1565c0; }
+
+    /* --- Touch Controls --- */
+    #touch-controls {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+    #touch-controls > * { pointer-events: auto; }
+    .touch-dpad-base {
+      position: absolute;
+      left: 20px; bottom: 20px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.18);
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+    .touch-dpad-btn {
+      position: absolute;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.5);
+      border-radius: 10px;
+      font-size: 18px; font-weight: bold;
+      color: #555;
+      text-shadow: 0 1px 0 #fff;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .touch-dpad-btn:active, .touch-dpad-btn.pressed {
+      background: rgba(255,255,255,0.85);
+    }
+    .touch-dpad-btn.up { top: 6px; left: 50%; transform: translateX(-50%); }
+    .touch-dpad-btn.down { bottom: 6px; left: 50%; transform: translateX(-50%); }
+    .touch-dpad-btn.left { left: 6px; top: 50%; transform: translateY(-50%); }
+    .touch-dpad-btn.right { right: 6px; top: 50%; transform: translateY(-50%); }
+
+    .touch-action-btn {
+      position: absolute;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,0.6);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .touch-action-btn:active, .touch-action-btn.pressed {
+      filter: brightness(1.3);
+      transform: scale(0.95);
+    }
+    .touch-boost-btn {
+      right: 26px; bottom: 156px;
+      width: 68px; height: 68px;
+      background: radial-gradient(circle at 40% 35%, #ffb74d, #ff9800);
+      font-size: 28px;
+    }
+    .touch-barrel-btn {
+      right: 32px; bottom: 66px;
+      width: 56px; height: 56px;
+      background: radial-gradient(circle at 40% 35%, #b388ff, #7c4dff);
+      font-size: 24px;
+    }
+
+    /* Utility */
+    .hidden { display: none !important; }
+
+    /* Countdown animation */
+    @keyframes countdownPop {
+      0% { transform: scale(1.5); opacity: 1; }
+      70% { transform: scale(1.0); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
   </style>
 </head>
 <body>
+  <div id="game-wrapper">
+    <!-- Canvas inserted here by PixiJS -->
+    <div id="ui-overlay">
+      <!-- Title Screen -->
+      <div id="title-screen" class="hidden">
+        <div class="title-clouds"></div>
+        <div class="title-heading">✈️ そらの おさんぽフライト</div>
+        <div class="title-record"></div>
+        <button class="title-btn" id="title-play-btn">✈️ あそぶ</button>
+        <div class="title-sub" id="title-sound">🔊 おと ON</div>
+        <div class="title-sub" id="title-level">🛩️ ひこうき Lv.1</div>
+      </div>
+
+      <!-- Countdown -->
+      <div id="countdown-overlay" class="hidden">
+        <div class="countdown-text" id="countdown-text"></div>
+      </div>
+
+      <!-- HUD -->
+      <div id="hud-layer" class="hidden">
+        <div class="hud-home" id="hud-home-btn">🏠</div>
+        <div class="hud-progress-wrap">
+          <div class="hud-progress-fill" id="hud-progress-fill" style="width:0%">
+            <span class="hud-progress-plane">✈️</span>
+          </div>
+        </div>
+        <div class="hud-coins" id="hud-coins">⭐ 0 / 40</div>
+        <div class="hud-timer" id="hud-timer">0.0 びょう</div>
+        <div class="hud-speedo" id="hud-speedo">
+          <svg viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="38" fill="rgba(26,26,46,0.85)" stroke="#444466" stroke-width="2"/>
+            <path id="speedo-arc" d="" stroke="#fff" stroke-width="2" fill="none" opacity="0.7"/>
+            <circle cx="40" cy="40" r="3" fill="#ffd700"/>
+            <line id="speedo-needle" x1="40" y1="40" x2="40" y2="14" stroke="#ffd700" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="hud-speedo-label">スピード</div>
+        </div>
+        <div class="hud-boost-wrap">
+          <span class="hud-boost-icon" id="hud-boost-icon">🔥</span>
+          <div class="hud-boost-bar">
+            <div class="hud-boost-fill ready" id="hud-boost-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Screen -->
+      <div id="result-screen" class="hidden">
+        <div class="result-panel">
+          <div class="result-home" id="result-home-btn">🏠</div>
+          <div class="result-heading">🏆 ゴール！</div>
+          <div class="result-stars" id="result-stars"></div>
+          <div class="result-title" id="result-title-text"></div>
+          <div class="result-body" id="result-time"></div>
+          <div class="result-accent hidden" id="result-newbest"></div>
+          <div class="result-body" id="result-coins"></div>
+          <div class="result-photo">📸</div>
+          <div class="result-photo-label">📸 きねんしゃしん</div>
+          <button class="result-btn result-btn-retry" id="result-retry-btn">🔄 もういちど</button>
+          <button class="result-btn result-btn-title" id="result-title-btn">🏠 タイトルへ</button>
+        </div>
+      </div>
+
+      <!-- Touch Controls (only visible on touch devices) -->
+      <div id="touch-controls" class="hidden">
+        <div class="touch-dpad-base">
+          <div class="touch-dpad-btn up" data-dir="up">▲</div>
+          <div class="touch-dpad-btn down" data-dir="down">▼</div>
+          <div class="touch-dpad-btn left" data-dir="left">◀</div>
+          <div class="touch-dpad-btn right" data-dir="right">▶</div>
+        </div>
+        <div class="touch-action-btn touch-boost-btn" id="touch-boost">🔥</div>
+        <div class="touch-action-btn touch-barrel-btn" id="touch-barrel">🌀</div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
