@@ -4,7 +4,7 @@ import { SaveData, loadSave } from './state';
 import {
   STYLE_TITLE, STYLE_BUTTON, STYLE_COUNTDOWN, STYLE_RECORD, STYLE_SUBLABEL,
   STYLE_RESULT_HEADING, STYLE_RESULT_BODY, STYLE_RESULT_ACCENT, STYLE_RESULT_TITLE,
-  STYLE_STARS, STYLE_PHOTO_LABEL,
+  STYLE_STARS,
 } from './styles';
 import { sfxClick, sfxCountdown, resumeAudio } from './audio';
 
@@ -249,21 +249,6 @@ export class ResultScreen {
     coinLabel.anchor.set(0.5, 0);
     coinLabel.position.set(GAME_WIDTH / 2, isNewBest ? 275 : 252);
     this.container.addChild(coinLabel);
-
-    // screenshot placeholder with polished frame
-    const photoFrame = new Graphics();
-    const fy = isNewBest ? 310 : 290;
-    // shadow
-    photoFrame.roundRect(GAME_WIDTH / 2 - 78, fy + 3, 160, 90, 8).fill({ color: 0x000000, alpha: 0.15 });
-    // frame
-    photoFrame.roundRect(GAME_WIDTH / 2 - 82, fy - 2, 168, 98, 10).fill(0xffd700);
-    // inner
-    photoFrame.roundRect(GAME_WIDTH / 2 - 78, fy + 2, 160, 90, 6).fill(0xf5f5f5);
-    this.container.addChild(photoFrame);
-    const photoLabel = new Text({ text: '📸 きねんしゃしん', style: STYLE_PHOTO_LABEL });
-    photoLabel.anchor.set(0.5, 0);
-    photoLabel.position.set(GAME_WIDTH / 2, fy + 98);
-    this.container.addChild(photoLabel);
 
     // buttons
     const retryBtn = this.makeButton('🔄 もういちど', GAME_WIDTH / 2, GAME_HEIGHT - 100, 0x4caf50, () => {

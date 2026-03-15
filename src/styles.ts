@@ -154,11 +154,3 @@ export const STYLE_RESULT_TITLE = makeStyle({
   dropShadow: { alpha: 0.25, angle: Math.PI / 4, blur: 3, color: '#999999', distance: 2 },
 });
 
-/** Photo label style */
-export const STYLE_PHOTO_LABEL = makeStyle({
-  fontSize: 13,
-  fontWeight: '700' as any,
-  fill: '#888888',
-  stroke: undefined,
-  dropShadow: undefined,
-});
